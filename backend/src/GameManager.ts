@@ -1,0 +1,23 @@
+import type WebSocket from "ws";
+
+interface Game {}
+export class GameManager {
+	private games: Game[];
+	private pendingUser: WebSocket;
+	private users: WebSocket[];
+
+	constructor() {
+		this.games = [];
+		this.users = [];
+	}
+
+	addUser(socket: WebSocket) {
+		this.users.push(socket);
+	}
+
+	removeUser(socket: WebSocket) {
+		this.users = this.users.filter((user) => user != socket);
+	}
+
+	private handleMessage() {}
+}
