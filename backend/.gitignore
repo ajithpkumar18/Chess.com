@@ -38,6 +38,9 @@ out/
 *.sln
 *.sw?
 
+chess.js.map
+.js.map
+
 # Optional npm cache
 .npm
 
