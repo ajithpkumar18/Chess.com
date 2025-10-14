@@ -7,7 +7,7 @@ const gameManager = new GameManager();
 
 wss.on("connection", function connection(ws) {
 	gameManager.addUser(ws);
-	ws.on("close", function message(data) {
+	ws.on("close", (data) => {
 		gameManager.removeUser(ws);
 	});
 });
