@@ -7,12 +7,15 @@ export class Game {
 	public player2: WebSocket;
 	public board: Chess;
 	public startTime: Date;
+	public moveCount: number;
 
 	constructor(player1: WebSocket, player2: WebSocket) {
 		this.player1 = player1;
 		this.player2 = player2;
 		this.board = new Chess();
 		this.startTime = new Date();
+		this.moveCount = 0;
+
 		this.player1.send(
 			JSON.stringify({
 				type: INIT_GAME,
@@ -33,11 +36,11 @@ export class Game {
 	}
 
 	makeMove(socket: WebSocket, move: { from: string; to: string }) {
-		if (this.board.moves().length % 2 === 0 && socket !== this.player1) {
+		if (this.moveCount % 2 === 0 && socket !== this.player1) {
 			return;
 		}
 
-		if (this.board.moves().length % 2 === 0 && socket !== this.player2) {
+		if (this.moveCount % 2 === 1 && socket !== this.player2) {
 			return;
 		}
 		try {
@@ -67,7 +70,7 @@ export class Game {
 			return;
 		}
 
-		if (this.board.moves().length % 2 === 0) {
+		if (this.moveCount % 2 === 0) {
 			this.player2.send(
 				JSON.stringify({
 					type: MOVE,
@@ -82,5 +85,7 @@ export class Game {
 				})
 			);
 		}
+
+		this.moveCount++;
 	}
 }
