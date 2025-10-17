@@ -1,13 +1,17 @@
+import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
+
 const Landing = () => {
+	const navigate = useNavigate();
 	return (
-		<div>
-			<div className='pt-8'>
+		<div className='flex justify-center'>
+			<div className='pt-8 max-w-screen-lg'>
 				<div className='grid grid-cols-2 gap-4 md:grid-cols-2'>
 					<div className='flex justify-center'>
 						<img
 							src={"chessboard.jpg"}
 							alt=''
-							className='max-w-96'
+							className='max-w-96 max-h-96 h-screen'
 						/>
 					</div>
 					<div className='pt-16'>
@@ -18,9 +22,9 @@ const Landing = () => {
 							</h1>
 						</div>
 						<div className='mt-4'>
-							<button className='px-8 py-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded'>
-								Play Online
-							</button>
+							<Button onClick={() => navigate("/game")}>
+								Play Now
+							</Button>
 						</div>
 					</div>
 				</div>
