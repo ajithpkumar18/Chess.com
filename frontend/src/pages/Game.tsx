@@ -22,7 +22,6 @@ const Game = () => {
 
 			switch (message.type) {
 				case INIT_GAME:
-					setChess(new Chess());
 					setBoard(chess.board());
 					console.log("Game Initialized");
 					break;
@@ -44,7 +43,12 @@ const Game = () => {
 			<div className='pt-8 max-w-screen-lg w-full '>
 				<div className='flex  w-full'>
 					<div className='  w-full  flex items-center justify-around'>
-						<ChessBoard board={board} />
+						<ChessBoard
+							board={board}
+							socket={socket}
+							chess={chess}
+							setBoard={setBoard}
+						/>
 					</div>
 					<div className=' bg-red-200 w-full'>
 						<Button
