@@ -64,7 +64,21 @@ const ChessBoard = ({
 											: "bg-emerald-600 text-white"
 									}`}
 								>
-									{square ? square.type : ""}
+									{square ? (
+										<img
+											src={`${
+												square.color == "b"
+													? `/assets/${square.type}.png`
+													: `/assets/${
+															square.type.toUpperCase() +
+															"2"
+													  }.png`
+											}`}
+											alt=''
+										/>
+									) : (
+										""
+									)}
 								</div>
 							);
 						})}
