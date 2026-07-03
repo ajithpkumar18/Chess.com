@@ -20,8 +20,16 @@ export class Game {
 		this.white = new Player(player1, "white");
 		this.black = new Player(player2, "black");
 
-		this.white.send(INIT_GAME, { color: "white", time: this.whiteTime });
-		this.black.send(INIT_GAME, { color: "black", time: this.blackTime });
+		this.white.send(INIT_GAME, {
+			color: "white",
+			whiteTime: this.whiteTime,
+			blackTime: this.blackTime,
+		});
+		this.black.send(INIT_GAME, {
+			color: "black",
+			whiteTime: this.whiteTime,
+			blackTime: this.blackTime,
+		});
 	}
 
 	makeMove(socket: WebSocket, move: { from: string; to: string }) {
@@ -68,11 +76,13 @@ export class Game {
 		const opponent =
 			currentPlayer.color === "white" ? this.black : this.white;
 
-		opponent.send(MOVE, {
-			move,
+		const clockPayload = {
 			whiteTime: this.whiteTime,
 			blackTime: this.blackTime,
-		});
+		};
+
+		opponent.send(MOVE, { move, ...clockPayload });
+		currentPlayer.send(MOVE, { move, ...clockPayload, self: true });
 
 		console.log(`move made by ${currentPlayer.color}`);
 

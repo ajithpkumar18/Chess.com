@@ -16,6 +16,8 @@ const Game = () => {
 	const [status, setStatus] = useState(false);
 	const [winner, setWinner] = useState<String | null>(null);
 	const [color, setColor] = useState<"white" | "black" | null>(null);
+	const [whiteTime, setWhiteTime] = useState(5 * 60 * 1000);
+	const [blackTime, setBlackTime] = useState(5 * 60 * 1000);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -28,13 +30,20 @@ const Game = () => {
 			switch (message.type) {
 				case INIT_GAME:
 					setColor(message.payload.color);
+					setWhiteTime(message.payload.whiteTime);
+					setBlackTime(message.payload.blackTime);
 					setBoard(chess.board());
 					console.log("Game Initialized");
 					break;
 				case MOVE:
 					const move = message.payload.move;
-					chess.move(move);
-					setBoard(chess.board());
+					setWhiteTime(message.payload.whiteTime);
+					setBlackTime(message.payload.blackTime);
+
+					if (!message.payload.self) {
+						chess.move(move);
+						setBoard(chess.board());
+					}
 					console.log("Move made");
 					break;
 				case GAME_OVER:
@@ -43,7 +52,16 @@ const Game = () => {
 			}
 		};
 	}, [socket]);
+
+	const formatTime = (ms: number) => {
+		const totalSeconds = Math.ceil(ms / 1000);
+		const m = Math.floor(totalSeconds / 60);
+		const s = totalSeconds % 60;
+		return `${m}:${s.toString().padStart(2, "0")}`;
+	};
+
 	if (!socket) return <div>Connecting</div>;
+
 	return (
 		<div className='justify-center flex w-full'>
 			{winner && (
@@ -77,6 +95,14 @@ const Game = () => {
 						/>
 					</div>
 					<div className=' bg-red-200 w-full'>
+						<div className='flex flex-col items-center gap-2 py-4'>
+							<div className='px-4 py-2 bg-slate-800 text-white rounded font-mono text-xl'>
+								Black: {formatTime(blackTime)}
+							</div>
+							<div className='px-4 py-2 bg-slate-100 text-black rounded font-mono text-xl'>
+								White: {formatTime(whiteTime)}
+							</div>
+						</div>
 						{!status && (
 							<Button
 								onClick={() => {
