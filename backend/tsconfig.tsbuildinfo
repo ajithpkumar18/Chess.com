@@ -1,1 +1,1 @@
-{"root":["./src/game.ts","./src/gamemanager.ts","./src/index.ts","./src/messages.ts"],"version":"5.9.3"}
+{"root":["./src/gamemanager.ts","./src/index.ts","./src/messages.ts","./src/game/chessgame.ts","./src/game/game.ts","./src/game/player.ts"],"version":"5.9.3"}

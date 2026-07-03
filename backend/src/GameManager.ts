@@ -1,51 +1,78 @@
 import type WebSocket from "ws";
 import { INIT_GAME, MOVE } from "./messages.js";
-import { Game } from "./Game.js";
+import { Game } from "./game/Game.js";
 
 export class GameManager {
-	private games: Game[];
-	private pendingUser: WebSocket | null;
-	private users: WebSocket[];
-
-	constructor() {
-		this.games = [];
-		this.users = [];
-		this.pendingUser = null;
-	}
+	private pendingUser: WebSocket | null = null;
+	private activeGames = new Map<WebSocket, Game>();
 
 	addUser(socket: WebSocket) {
-		this.users.push(socket);
-		this.addHandler(socket);
+		this.addHandlers(socket);
 	}
 
 	removeUser(socket: WebSocket) {
-		this.users = this.users.filter((user) => user != socket);
+		// If user was waiting, remove them
+		if (this.pendingUser === socket) {
+			this.pendingUser = null;
+		}
+
+		// If user was in a game, clean up
+		const game = this.activeGames.get(socket);
+		if (game) {
+			this.activeGames.delete(socket);
+			// optional: notify opponent about forfeit
+		}
 	}
 
-	private addHandler(socket: WebSocket) {
+	private addHandlers(socket: WebSocket) {
 		socket.on("message", (data) => {
-			const message = JSON.parse(data.toString());
+			let message: any;
 
-			if (message.type === INIT_GAME) {
-				if (this.pendingUser) {
-					const game = new Game(this.pendingUser, socket);
-					this.games.push(game);
-					this.pendingUser = null;
-				} else {
-					this.pendingUser = socket;
-				}
+			try {
+				message = JSON.parse(data.toString());
+			} catch {
+				return;
 			}
 
-			if (message.type === MOVE) {
-				console.log("This is the move = ", message);
-				const game = this.games.find(
-					(game) => game.player1 === socket || game.player2 === socket
-				);
-				if (game) {
-					console.log("Game found = ", game);
-					game.makeMove(socket, message.payload.move);
-				}
+			switch (message.type) {
+				case INIT_GAME:
+					console.log("init game");
+					this.handleInitGame(socket);
+					break;
+
+				case MOVE:
+					this.handleMove(socket, message.payload);
+					break;
 			}
 		});
+
+		socket.on("close", () => {
+			this.removeUser(socket);
+		});
+	}
+
+	private handleInitGame(socket: WebSocket) {
+		if (this.pendingUser) {
+			const game = new Game(this.pendingUser, socket);
+
+			// map both players to the same game
+			this.activeGames.set(this.pendingUser, game);
+			this.activeGames.set(socket, game);
+
+			this.pendingUser = null;
+		} else {
+			this.pendingUser = socket;
+		}
+	}
+
+	private handleMove(socket: WebSocket, move: { from: string; to: string }) {
+		const game = this.activeGames.get(socket);
+		if (!game) {
+			console.log("No game found");
+			return;
+		}
+
+		let msg = game.makeMove(socket, move);
+		return msg;
 	}
 }

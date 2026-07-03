@@ -7,14 +7,15 @@ const ChessBoard = ({
 	socket,
 	chess,
 	setBoard,
+	color,
 }: {
 	chess: any;
 	setBoard: any;
 	board: ({ square: Square; type: PieceSymbol; color: Color } | null)[][];
 	socket: WebSocket;
+	color: "white" | "black" | null;
 }) => {
 	const [from, setFrom] = useState<null | Square>(null);
-	const [to, setTo] = useState<null | Square>(null);
 	return (
 		<div className='text-white-200'>
 			{board.map((row, i) => {
@@ -22,7 +23,7 @@ const ChessBoard = ({
 					<div key={i} className='flex'>
 						{row.map((square, j) => {
 							const squareRepresentation = (String.fromCharCode(
-								97 + (j % 8)
+								97 + (j % 8),
 							) +
 								"" +
 								(8 - i)) as Square;
@@ -31,7 +32,15 @@ const ChessBoard = ({
 									key={j}
 									onClick={() => {
 										console.log("click");
+										const myTurn =
+											color && chess.turn() === color[0];
+
+										if (!myTurn) return;
+
 										if (!from) {
+											if (square?.color !== color?.[0]) {
+												return;
+											}
 											setFrom(squareRepresentation);
 											console.log(squareRepresentation);
 										} else {
@@ -39,22 +48,27 @@ const ChessBoard = ({
 												JSON.stringify({
 													type: MOVE,
 													payload: {
-														move: {
-															from,
-															to: squareRepresentation,
-														},
+														from,
+														to: squareRepresentation,
 													},
-												})
+												}),
 											);
 											console.log(
 												squareRepresentation,
-												"send"
+												"send",
 											);
-											chess.move({
-												from,
-												to: squareRepresentation,
-											});
-											setBoard(chess.board());
+											try {
+												chess.move({
+													from,
+													to: squareRepresentation,
+												});
+												setBoard(chess.board());
+											} catch (err) {
+												console.log(
+													"Illegal move",
+													err,
+												);
+											}
 											setFrom(null);
 										}
 									}}
@@ -72,7 +86,7 @@ const ChessBoard = ({
 													: `/assets/${
 															square.type.toUpperCase() +
 															"2"
-													  }.png`
+														}.png`
 											}`}
 											alt=''
 										/>

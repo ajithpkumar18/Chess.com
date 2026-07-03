@@ -63,3 +63,4 @@ chess.js.map
 
 # Bundle artifacts
 *.jsbundle   
+*.tsbuildinfo

@@ -3,6 +3,7 @@ import ChessBoard from "../components/ChessBoard";
 import { useSocket } from "../hooks/useSocket";
 import { Chess } from "chess.js";
 import Button from "../components/Button";
+import { useNavigate } from "react-router-dom";
 
 export const INIT_GAME = "init_game";
 export const MOVE = "move";
@@ -14,6 +15,8 @@ const Game = () => {
 	const [board, setBoard] = useState(chess.board());
 	const [status, setStatus] = useState(false);
 	const [winner, setWinner] = useState<String | null>(null);
+	const [color, setColor] = useState<"white" | "black" | null>(null);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!socket) return;
@@ -24,11 +27,12 @@ const Game = () => {
 
 			switch (message.type) {
 				case INIT_GAME:
+					setColor(message.payload.color);
 					setBoard(chess.board());
 					console.log("Game Initialized");
 					break;
 				case MOVE:
-					const move = message.payload;
+					const move = message.payload.move;
 					chess.move(move);
 					setBoard(chess.board());
 					console.log("Move made");
@@ -44,13 +48,20 @@ const Game = () => {
 		<div className='justify-center flex w-full'>
 			{winner && (
 				<div className='absolute top-0 left-0 backdrop-brightness-50 backdrop-blur-lg  h-full w-full flex items-center justify-center'>
-					<div className='w-2/4 pt-5 h-48 bg-slate-200 font-semibold text-2xl text-center rounded-2xl'>
+					<div className='w-1/4 pt-12 min-h-4/12 bg-slate-200 font-semibold text-2xl text-center rounded-2xl'>
 						The winner is
 						<br />
 						<p className='text-4xl text-red-400 pt-5'>
 							{winner.charAt(0).toUpperCase() +
 								winner.slice(1, winner.length)}
 						</p>
+						<button
+							type='button'
+							className='bg-green-500 rounded-md p-2 mt-7 min-w-32 text-amber-50 cursor-pointer'
+							onClick={() => navigate("/")}
+						>
+							Home
+						</button>
 					</div>
 				</div>
 			)}
@@ -62,6 +73,7 @@ const Game = () => {
 							socket={socket}
 							chess={chess}
 							setBoard={setBoard}
+							color={color}
 						/>
 					</div>
 					<div className=' bg-red-200 w-full'>
@@ -71,7 +83,7 @@ const Game = () => {
 									socket.send(
 										JSON.stringify({
 											type: INIT_GAME,
-										})
+										}),
 									);
 
 									setStatus(true);
