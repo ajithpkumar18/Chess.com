@@ -65,7 +65,7 @@ const Game = () => {
 	return (
 		<div className='justify-center flex w-full'>
 			{winner && (
-				<div className='absolute top-0 left-0 backdrop-brightness-50 backdrop-blur-lg  h-full w-full flex items-center justify-center'>
+				<div className='absolute top-0 left-0 backdrop-brightness-50 backdrop-blur-lg  h-full w-full flex items-center justify-center z-50'>
 					<div className='w-1/4 pt-12 min-h-4/12 bg-slate-200 font-semibold text-2xl text-center rounded-2xl'>
 						The winner is
 						<br />
