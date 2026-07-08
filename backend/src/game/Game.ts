@@ -88,7 +88,7 @@ export class Game {
 
 		if (this.chessGame.isGameOver()) {
 			const winner = this.chessGame.getWinner();
-			this.endGame(winner, "checkmate");
+			this.endGame(winner, this.chessGame.getGameOverReason());
 		}
 	}
 
@@ -114,7 +114,7 @@ export class Game {
 
 	private endGame(
 		winner: "white" | "black" | "draw",
-		reason: "checkmate" | "timeout",
+		reason: "checkmate" | "timeout" | "stalemate" | "draw",
 	) {
 		if (this.isOver) return;
 		this.isOver = true;

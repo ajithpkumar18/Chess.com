@@ -28,4 +28,14 @@ export class ChessGame {
 
 		return this.chess.turn() === "w" ? "black" : "white";
 	}
+
+	isCheck(): Boolean {
+		return this.chess.isCheck();
+	}
+
+	getGameOverReason(): "checkmate" | "stalemate" | "draw" {
+		if (this.chess.isCheckmate()) return "checkmate";
+		if (this.chess.isStalemate()) return "stalemate";
+		return "draw";
+	}
 }

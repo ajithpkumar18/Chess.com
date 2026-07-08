@@ -15,6 +15,7 @@ const Game = () => {
 	const [board, setBoard] = useState(chess.board());
 	const [status, setStatus] = useState(false);
 	const [winner, setWinner] = useState<String | null>(null);
+	const [reason, setReason] = useState<String | null>(null);
 	const [color, setColor] = useState<"white" | "black" | null>(null);
 	const [whiteTime, setWhiteTime] = useState(5 * 60 * 1000);
 	const [blackTime, setBlackTime] = useState(5 * 60 * 1000);
@@ -48,10 +49,31 @@ const Game = () => {
 					break;
 				case GAME_OVER:
 					setWinner(message.payload.winner);
+					setReason(message.payload.reason);
 					break;
 			}
 		};
 	}, [socket]);
+
+	useEffect(() => {
+		if (!status || winner) return;
+
+		const interval = setInterval(() => {
+			if (chess.turn() === "w") {
+				setWhiteTime((t) => Math.max(0, t - 1000));
+			} else {
+				setBlackTime((t) => Math.max(0, t - 1000));
+			}
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, [status, winner, chess]);
+
+	useEffect(() => {
+		if (chess.isCheck()) {
+			console.log("Check !");
+		}
+	}, [board]);
 
 	const formatTime = (ms: number) => {
 		const totalSeconds = Math.ceil(ms / 1000);
@@ -73,6 +95,11 @@ const Game = () => {
 							{winner.charAt(0).toUpperCase() +
 								winner.slice(1, winner.length)}
 						</p>
+						{reason && (
+							<p className='text-sm text-slate-600 pt-2 uppercase tracking-wide'>
+								by {reason}
+							</p>
+						)}
 						<button
 							type='button'
 							className='bg-green-500 rounded-md p-2 mt-7 min-w-32 text-amber-50 cursor-pointer'
@@ -86,6 +113,11 @@ const Game = () => {
 			<div className='pt-8 max-w-screen-lg w-full '>
 				<div className='flex  w-full'>
 					<div className='  w-full  flex items-center justify-around'>
+						{chess.inCheck() && !winner && (
+							<div className='absolute mt-10 px-3 py-1 bg-red-500 text-white font-bold rounded'>
+								Check!
+							</div>
+						)}
 						<ChessBoard
 							board={board}
 							socket={socket}
